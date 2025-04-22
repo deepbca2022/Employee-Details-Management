@@ -5,65 +5,89 @@ const LoginPage = () => {
   const [userType, setUserType] = useState("employee"); // default to employee
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [organization, setOrganization] = useState("");
   const navigate = useNavigate(); // <-- Initialize navigate
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (userType === "corporate") {
-      navigate("/corporate-entry"); // <-- Redirect to corporate entry page
+    if (userType === "employee") {
+      navigate("/employee-entry", { state: { organization } });
     } else {
-      alert(`${userType.toUpperCase()} Logged in with email: ${email}`);
-      // You can later add employee-specific navigation here
+      navigate("/corporate-entry");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2 style={styles.heading}>Login Page</h2>
-
-      <div style={styles.toggle}>
-        <button
-          onClick={() => setUserType("employee")}
-          style={userType === "employee" ? styles.activeTab : styles.tab}
-        >
-          Employee
-        </button>
-        <button
-          onClick={() => setUserType("corporate")}
-          style={userType === "corporate" ? styles.activeTab : styles.tab}
-        >
-          Corporate
-        </button>
+    <>
+      <div style={styles.header}>
+        <h1>Employee Management Portal</h1>
       </div>
+      <div style={styles.container}>
+        <h2 style={styles.heading}>Login </h2>
 
-      <form onSubmit={handleLogin} style={styles.form}>
-        <label style={styles.label}>Email</label>
-        <input
-          type="email"
-          style={styles.input}
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        <div style={styles.toggle}>
+          <button
+            onClick={() => setUserType("employee")}
+            style={userType === "employee" ? styles.activeTab : styles.tab}
+          >
+            Employee
+          </button>
+          <button
+            onClick={() => setUserType("corporate")}
+            style={userType === "corporate" ? styles.activeTab : styles.tab}
+          >
+            Corporate
+          </button>
+        </div>
 
-        <label style={styles.label}>Password</label>
-        <input
-          type="password"
-          style={styles.input}
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <form onSubmit={handleLogin} style={styles.form}>
+          <label style={styles.label}>Email</label>
+          <input
+            type="email"
+            style={styles.input}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required />
 
-        <button type="submit" style={styles.loginButton}>
-          Login as {userType}
-        </button>
-      </form>
-    </div>
+          <label style={styles.label}>Password</label>
+          <input
+            type="password"
+            style={styles.input}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required />
+
+          {userType === "employee" && (
+            <>
+              <label style={styles.label}>Name of Organization</label>
+              <select
+                style={styles.input}
+                value={organization}
+                onChange={(e) => setOrganization(e.target.value)}
+                required
+              >
+                <option value="">--Select Organization--</option>
+                <option value="ABC Corp">ABC Corp</option>
+                <option value="XYZ Ltd">XYZ Ltd</option>
+                <option value="TechSoft">TechSoft</option>
+                <option value="Other">Other</option>
+              </select>
+            </>
+          )}
+
+          <button type="submit" style={styles.loginButton}>
+            Login as {userType}
+          </button>
+        </form>
+      </div></>
   );
 };
 
 const styles = {
+  header:{
+    justifyContent:"center",
+    textAlign:"center",
+  },
   container: {
     maxWidth: 400,
     margin: "60px auto",

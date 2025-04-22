@@ -1,214 +1,169 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useState } from "react";
+import CorporateEntryForm from '../Corporate/corporateEntry';
+import { useLocation } from "react-router-dom";
+   
 
-const EmpForm = ({ saveFnc, data = {} }) => {
-    const [firstName, setFirstName] = useState(data.firstName || '');
-    const [lastName, setLastName] = useState(data.lastName || '');
-    const [salary, setSalary] = useState(data.salary || '');
-    const [gender, setGender] = useState(data.gender || '');
-    const [jobType, setJobType] = useState(data.jobType || '');
-    const [countries, setCountries] = useState([]);
-    const [states, setStates] = useState([]);
-    const [cities, setCities] = useState([]);
-    const [selectedCountry, setSelectedCountry] = useState('');
-    const [selectedState, setSelectedState] = useState('');
-    const [selectedCity, setSelectedCity] = useState('');
+const EmployeeEntryForm = ({ onSubmit }) => {
+  const location = useLocation();
+  const organization = location.state?.organization || "";
+  const [empName, setEmpName] = useState("");
+  const [contactNo, setContactNo] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [jobRole, setJobRole] = useState("");
+  const [employmentType, setEmploymentType] = useState("");
+  const [locationField, setLocationField] = useState("");
+  const [duration, setDuration] = useState("");
+  const [empID, setEmpID] = useState("");
 
-    useEffect(() => {
-        axios.get("https://countriesnow.space/api/v0.1/countries")
-            .then((response) => setCountries(response.data.data))
-            .catch((error) => console.error("Error fetching countries:", error));
-    }, []);
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-    const fetchStates = (country) => {
-        setSelectedCountry(country);
-        setStates([]);
-        setCities([]);
-        axios.post("https://countriesnow.space/api/v0.1/countries/states", { country })
-            .then((response) => setStates(response.data.data.states))
-            .catch((error) => console.error("Error fetching states:", error));
+    const corporateData = {
+      organization,
+      empName,
+      empID,
+      contactNo,
+      email,
+      phone,
+      jobRole,
+      employmentType,
+      location: locationField,
+      duration,
     };
 
-    const fetchCities = (state) => {
-        setSelectedState(state);
-        setCities([]);
-        axios.post("https://countriesnow.space/api/v0.1/countries/state/cities", {
-            country: selectedCountry,
-            state,
-        })
-            .then((response) => setCities(response.data.data))
-            .catch((error) => console.error("Error fetching cities:", error));
-    };
+    if (onSubmit) onSubmit(corporateData);
+    alert("Employee details submitted successfully!");
 
-    const handleButton = () => {
-        let id = data && data.id ? data.id : Math.random();
-        let obj = {
-            id,
-            firstName,
-            lastName,
-            salary,
-            gender,
-            jobType,
-            country: selectedCountry,
-            state: selectedState,
-            city: selectedCity,
-        };
-        saveFnc(obj);
-    };
+    setEmpName("");
+    setEmpID("");
+    setContactNo("");
+    setEmail("");
+    setPhone("");
+    setJobRole("");
+    setEmploymentType("");
+    setLocationField("");
+    setDuration("");
+  };
 
-    const handleReset = () => {
-        setFirstName('');
-        setLastName('');
-        setSalary('');
-        setGender('');
-        setJobType('');
-        setSelectedCountry('');
-        setSelectedState('');
-        setSelectedCity('');
-        setStates([]);
-        setCities([]);
-    };
+  return (
+    <div style={styles.container}>
+      <h2 style={styles.heading}>Employee Details Entry</h2>
+      <form onSubmit={handleSubmit} style={styles.form}>
 
-    return (
-        <div style={styles.container}>
-            <h2 style={styles.heading}>Employee Form</h2>
-            <table style={styles.table}>
-                <tbody>
-                    <tr>
-                        <td style={styles.label}>First Name</td>
-                        <td><input type="text" value={firstName} onChange={e => setFirstName(e.target.value)} style={styles.input} /></td>
-                    </tr>
-                    <tr>
-                        <td style={styles.label}>Last Name</td>
-                        <td><input type="text" value={lastName} onChange={e => setLastName(e.target.value)} style={styles.input} /></td>
-                    </tr>
-                    <tr>
-                        <td style={styles.label}>Salary</td>
-                        <td><input type="text" value={salary} onChange={e => setSalary(e.target.value)} style={styles.input} /></td>
-                    </tr>
-                    <tr>
-                        <td style={styles.label}>Gender</td>
-                        <td>
-                            <select value={gender} onChange={e => setGender(e.target.value)} style={styles.input}>
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style={styles.label}>Job Type</td>
-                        <td>
-                            <select value={jobType} onChange={e => setJobType(e.target.value)} style={styles.input}>
-                                <option value="">Select Job Type</option>
-                                <option value="Part-Time">Part-Time</option>
-                                <option value="Full-Time">Full-Time</option>
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style={styles.label}>Country</td>
-                        <td>
-                            <select value={selectedCountry} onChange={e => fetchStates(e.target.value)} style={styles.input}>
-                                <option value="">Select Country</option>
-                                {countries.map((c, idx) => (
-                                    <option key={idx} value={c.country}>{c.country}</option>
-                                ))}
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style={styles.label}>State</td>
-                        <td>
-                            <select value={selectedState} onChange={e => fetchCities(e.target.value)} style={styles.input}>
-                                <option value="">Select State</option>
-                                {states.map((s, idx) => (
-                                    <option key={idx} value={s.name}>{s.name}</option>
-                                ))}
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td style={styles.label}>City</td>
-                        <td>
-                            <select value={selectedCity} onChange={e => setSelectedCity(e.target.value)} style={styles.input}>
-                                <option value="">Select City</option>
-                                {cities.map((city, idx) => (
-                                    <option key={idx} value={city}>{city}</option>
-                                ))}
-                            </select>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td colSpan="2" style={styles.buttonRow}>
-                            <button onClick={handleButton} style={{ ...styles.button, ...styles.save }}>Save</button>
-                            <button onClick={handleReset} style={{ ...styles.button, ...styles.reset }}>Reset</button>
-                            <button onClick={handleReset} style={{ ...styles.button, ...styles.cancel }}>Go Back</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    );
+      <label style={styles.label}>Organization</label>
+        <input style={styles.input} type="text" value={organization} disabled />
+
+        <label style={styles.label}>Name</label>
+        <input style={styles.input} type="text" value={empName} placeholder="--Enter Name--" onChange={(e) => setEmpName(e.target.value)} required />
+
+        <label style={styles.label}>Employee ID</label>
+        <input style={styles.input} type="text" value={empID} onChange={(e) => setEmpID(e.target.value)} placeholder="--Enter Employee ID--" required />
+
+        <label style={styles.label}>Primary Contact Number</label>
+        <input style={styles.input} type="text" value={contactNo} onChange={(e) => setContactNo(e.target.value)} placeholder="--Enter Contact Number--" required />
+
+        <label style={styles.label}>Email</label>
+        <input style={styles.input} type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="--Enter Email ID--" required />
+
+        <label style={styles.label}>ALternate Number</label>
+        <input style={styles.input} type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="--Enter Alternate Number--" required />
+
+        <label style={styles.label}>Job Role</label>
+            <select
+            style={styles.input}
+            value={jobRole}
+            onChange={(e) => setJobRole(e.target.value)}
+            required
+            >
+            <option value="">--Select Job Role--</option>
+            <option value="IT">IT</option>
+            <option value="Audit">Audit</option>
+            <option value="Customer Support">Customer Support</option>
+            <option value="Front-Desk">Front-Desk</option>
+            <option value="Manager">Manager</option>
+            <option value="Accounts">Accounts</option>
+            <option value="HR">HR</option>
+            </select>
+
+        <label style={styles.label}>Employment Type</label>
+            <select
+            style={styles.input}
+            value={employmentType}
+            onChange={(e) => setEmploymentType(e.target.value)}
+            required
+            >
+            <option value="">--Select employment type--</option>
+            <option value="part-time">Part-time</option>
+            <option value="full-time">Full-time</option>
+            <option value="contractual">Contractual</option>
+            </select>
+
+        <label style={styles.label}>Location</label>
+            <select
+            style={styles.input}
+            value={locationField}
+            onChange={(e) => setLocationField(e.target.value)}
+            required
+            >
+            <option value="">--Select Location--</option>
+            <option value="Kolkata">Kolkata</option>
+            <option value="Bengalore">Bengalore</option>
+            <option value="Hyderabadt">Hyderabad</option>
+            <option value="Noida">Noida</option>
+            <option value="Gurugram">Gurugram</option>
+            <option value="Chennai">Chennai</option>
+            <option value="Mumbai">Mumbai</option>
+            </select>
+
+        <label style={styles.label}>Duration(in months)</label>
+        <input style={styles.input} type="text" value={duration} onChange={(e) => setDuration(e.target.value)} required />
+
+        <button type="submit" style={styles.button}>Submit</button>
+      </form>
+    </div>
+  );
 };
 
 const styles = {
-    container: {
-        backgroundColor: '#f8f9fa',
-        padding: 20,
-        borderRadius: 10,
-        width: '80%',
-        maxWidth: 600,
-        margin: '20px auto',
-        boxShadow: '0 0 10px rgba(0,0,0,0.1)',
-        fontFamily: 'Arial, sans-serif',
-    },
-    heading: {
-        textAlign: 'center',
-        marginBottom: 20,
-        color: '#2c3e50',
-    },
-    table: {
-        width: '100%',
-        borderSpacing: '0 10px',
-    },
-    label: {
-        fontWeight: 'bold',
-        paddingRight: 10,
-        textAlign: 'right',
-        verticalAlign: 'middle',
-        width: '30%',
-    },
-    input: {
-        width: '100%',
-        padding: 8,
-        borderRadius: 5,
-        border: '1px solid #ccc',
-    },
-    buttonRow: {
-        textAlign: 'center',
-        paddingTop: 20,
-    },
-    button: {
-        marginRight: 10,
-        padding: '8px 16px',
-        borderRadius: 5,
-        fontWeight: 'bold',
-        cursor: 'pointer',
-        border: 'none',
-    },
-    save: {
-        backgroundColor: '#28a745',
-        color: 'white',
-    },
-    reset: {
-        backgroundColor: '#ffc107',
-        color: 'white',
-    },
-    cancel: {
-        backgroundColor: '#dc3545',
-        color: 'white',
-    }
+  container: {
+    maxWidth: 500,
+    margin: "50px auto",
+    padding: 30,
+    borderRadius: 10,
+    backgroundColor: "#f9f9f9",
+    boxShadow: "0px 0px 10px rgba(0,0,0,0.1)",
+    fontFamily: "Arial, sans-serif",
+  },
+  heading: {
+    textAlign: "center",
+    marginBottom: 25,
+    color: "#333",
+  },
+  form: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  label: {
+    marginBottom: 5,
+    fontWeight: "bold",
+  },
+  input: {
+    marginBottom: 15,
+    padding: 10,
+    borderRadius: 5,
+    border: "1px solid #ccc",
+  },
+  button: {
+    padding: 12,
+    backgroundColor: "#007bff",
+    color: "white",
+    border: "none",
+    borderRadius: 5,
+    fontWeight: "bold",
+    cursor: "pointer",
+    marginTop: 10,
+  },
 };
 
-export default EmpForm;
+export default EmployeeEntryForm;
